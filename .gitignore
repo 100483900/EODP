@@ -12,7 +12,7 @@ lib/
 # Tools outputs
 *.nc
 *.png
-*.txt
+#*.txt
 *.log
 
 # Test outputs

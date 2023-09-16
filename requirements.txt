@@ -1,0 +1,5 @@
+numpy~=1.25.2
+matplotlib~=3.8.0
+scipy~=1.11.2
+mgrs~=1.4.5
+netCDF4~=1.6.4

@@ -2,11 +2,13 @@
 # MAIN FUNCTION TO CALL THE ISM MODULE
 
 from ism.src.ism import ism
+import os
 
 # Directory - this is the common directory for the execution of the E2E, all modules
-auxdir = r'../auxiliary'
-indir = r"C:\EODP\EODP_TER_2021_working\EODP-TS-ISM\input\gradient_alt100_act150" # small scene
-outdir = r"C:\EODP\EODP_TER_2021_working\EODP-TS-ISM\myoutput"
+ROOT_DIR = '../'
+auxdir = os.path.join(ROOT_DIR, 'auxiliary')
+indir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-ISM/input")
+outdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-ISMoutput")
 
 # Initialise the ISM
 myIsm = ism(auxdir, indir, outdir)

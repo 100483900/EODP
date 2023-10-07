@@ -1,12 +1,57 @@
+import logging
+
 from common.io.writeToa import readToa
 import numpy as np
+from config.globalConfig import globalConfig
+#from l1b.mainL1b import auxdir, indir, outdir
+import os
+import matplotlib.pyplot as plt
 
-# Compare outputs
-bands = ['VNIR-0', 'VNIR-1', 'VNIR-2', 'VNIR-3']
 
-for band in bands:
-    # Read LUSS
-    toa_luss = readToa()
+# Inits
+globalConfig = globalConfig()
+ROOT_DIR = '../../'
+auxdir = os.path.join(ROOT_DIR, 'auxiliary')
+indir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/input")
+outdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/output")
+outeqoffdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/output_eqoff")
+outrefdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/output_ref")
+
+# PASS/FAIL Criteria 1
+for band in globalConfig.bands:
+    try:
+        toa = readToa(outdir, globalConfig.l1b_toa + band + '.nc')
+        toa_ref = readToa(outdir, globalConfig.l1b_toa + band + '.nc')
+        error = (np.abs(toa-toa_ref)/toa)*100
+        assert (error < 0.01).sum() > toa_ref.size*0.997
+        print(f'PASSED for {band}')
+    except AssertionError as e:
+        print(f'TEST failed for band: {band}. Points exceeding 0.01 deviation: {(error > 0.01).sum()} of {toa_ref.size-toa_ref.size*0.997} allowed')
+
+# PASS/FAIL Criteria 2 and 3
+    try:
+        toa = readToa(outdir, globalConfig.l1b_toa + band + '.nc')
+        ism_toa_isrf = readToa(indir, globalConfig.ism_toa_isrf + band + '.nc')
+        toa_eqoff = readToa(outeqoffdir, globalConfig.l1b_toa + band + '.nc')
+
+        central_ALT_toa = toa[int(toa.shape[0]/2),:]
+        central_ALT_ism_toa_isrf = ism_toa_isrf[int(ism_toa_isrf.shape[0] / 2), :]
+        central_ALT_toa_eqoff = toa_eqoff[int(toa_eqoff.shape[0] / 2), :]
+
+        # Plot
+        plt.title("Line graph")
+        plt.plot(central_ALT_toa, color="black")
+        plt.plot(central_ALT_ism_toa_isrf, color="blue")
+        plt.plot(central_ALT_toa_eqoff, color="red")
+        plt.legend(["TOA L1B with equalizer", "TOA L1B ISRF", "TOA L1B no equalizer"], loc="lower right")
+        plt.xlabel("ACT pixel [-]")
+        plt.ylabel("TOA [mW/m2/sr]")
+        plt.title(f'Effect of the Equalization for {band}')
+        plt.grid()
+        plt.show()
+
+    except AssertionError as e:
+        print()
 
 
 

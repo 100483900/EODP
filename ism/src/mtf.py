@@ -69,7 +69,7 @@ class mtf:
 
         # Calculate the System MTF
         self.logger.debug("Calculation of the Sysmtem MTF by multiplying the different contributors")
-        Hsys = 1 # dummy
+        Hsys = Hdiff*Hdefoc*Hwfe*Hdet*Hsmear*Hmotion
 
         # Plot cuts ACT/ALT of the MTF
         self.plotMtf(Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band)
@@ -210,6 +210,35 @@ class mtf:
         :param band: band
         :return: N/A
         """
-        #TODO
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        halfAct = int(np.floor(fnAct.shape[0] / 2))
+        halfAlt = int(np.floor(fnAlt.shape[0] / 2))
+        # Plot each MTF component
+        ax.plot(fnAct[halfAct:], Hdiff[halfAlt, halfAct:], color='b', label='Diffraction MTF (Hdiff)', linestyle='--', )
+        ax.plot(fnAct[halfAct:], Hdefoc[halfAlt, halfAct:], 'c', label='Defocusing MTF (Hdefoc)', linestyle='--')
+        ax.plot(fnAct[halfAct:], Hwfe[halfAlt, halfAct:], 'g', label='Wavefront Electronics MTF (Hwfe)', linestyle='--')
+        ax.plot(fnAct[halfAct:], Hdet[halfAlt, halfAct:], 'r', label='Detector MTF (Hdet)', linestyle='--')
+        ax.plot(fnAct[halfAct:], Hsmear[halfAlt, halfAct:], 'm', label='Smearing MTF (Hsmear)', linestyle='--')
+        ax.plot(fnAct[halfAct:], Hmotion[halfAlt, halfAct:], 'y', label='Motion Blur MTF (Hsmear)', linestyle='--')
+        ax.plot(fnAct[halfAct:], Hsys[halfAlt, halfAct:], 'k', label='System MTF (Hsys)', linewidth=2)
+
+        # Set plot title and labels
+        ax.set_title('MTF Components')
+        ax.set_xlabel('Normalized Frequency (f/(1/w))')
+        ax.set_ylabel('MTF Value')
+
+        # Add a legend
+        ax.legend()
+        ax.set_ylim(0)
+        ax.grid()
+
+        # Save the plot to the specified directory with the given band name
+        #plt.savefig(f'{directory}/{band}_MTF.png')
+
+        # Show the plot (optional)
+        plt.show()
+
 
 

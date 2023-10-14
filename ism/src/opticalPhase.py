@@ -1,3 +1,4 @@
+import logging
 
 from ism.src.initIsm import initIsm
 from math import pi
@@ -94,7 +95,7 @@ class opticalPhase(initIsm):
         """
         rad2irra = Tr * pi * (D / f) * (D / f) / 4
         toa = toa * rad2irra
-
+        self.logger.info(f"TEST Criteria: Radiance to irradiance criteria = {rad2irra}")
         return toa
 
 

@@ -104,6 +104,9 @@ class mtf:
         fnAlt = fAlt/(1/w)
         fnAct = fAct/(1/w)
 
+        #nyquist_f = 1/(2/w)
+        #self.logger.info(f"Nyquist Frequency = {nyquist_f}")
+
         [fnAltxx, fnActxx] = np.meshgrid(fnAlt, fnAct, indexing='ij')
         fn2D = np.sqrt(fnAltxx * fnAltxx + fnActxx * fnActxx)
 
@@ -211,34 +214,59 @@ class mtf:
         :return: N/A
         """
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(2, figsize=(10, 18))
 
-        halfAct = int(np.floor(fnAct.shape[0] / 2))
-        halfAlt = int(np.floor(fnAlt.shape[0] / 2))
+        halfAct = int(fnAct.shape[0] / 2)
+        halfAlt = int(fnAlt.shape[0] / 2)
         # Plot each MTF component
-        ax.plot(fnAct[halfAct:], Hdiff[halfAlt, halfAct:], color='b', label='Diffraction MTF (Hdiff)')
-        ax.plot(fnAct[halfAct:], Hdefoc[halfAlt, halfAct:], 'c', label='Defocusing MTF (Hdefoc)')
-        ax.plot(fnAct[halfAct:], Hwfe[halfAlt, halfAct:], 'g', label='Wavefront Electronics MTF (Hwfe)')
-        ax.plot(fnAct[halfAct:], Hdet[halfAlt, halfAct:], 'r', label='Detector MTF (Hdet)')
-        ax.plot(fnAct[halfAct:], Hsmear[halfAlt, halfAct:], 'm', label='Smearing MTF (Hsmear)')
-        ax.plot(fnAct[halfAct:], Hmotion[halfAlt, halfAct:], 'y', label='Motion Blur MTF (Hsmear)')
-        ax.plot(fnAct[halfAct:], Hsys[halfAlt, halfAct:], 'k', label='System MTF (Hsys)', linewidth=2)
+        ax[0].plot(fnAct[halfAct:], Hdiff[halfAlt, halfAct:], color='b', label='Diffraction MTF (Hdiff)')
+        ax[0].plot(fnAct[halfAct:], Hdefoc[halfAlt, halfAct:], 'c', label='Defocusing MTF (Hdefoc)')
+        ax[0].plot(fnAct[halfAct:], Hwfe[halfAlt, halfAct:], 'g', label='Wavefront Electronics MTF (Hwfe)')
+        ax[0].plot(fnAct[halfAct:], Hdet[halfAlt, halfAct:], 'r', label='Detector MTF (Hdet)')
+        ax[0].plot(fnAct[halfAct:], Hsmear[halfAlt, halfAct:], 'm', label='Smearing MTF (Hsmear)')
+        ax[0].plot(fnAct[halfAct:], Hmotion[halfAlt, halfAct:], 'y', label='Motion Blur MTF (Hsmear)')
+        ax[0].plot(fnAct[halfAct:], Hsys[halfAlt, halfAct:], 'k', label='System MTF (Hsys)', linewidth=2)
+        ax[0].axvline(fnAct[fnAct.shape[0]-1], color='k', label='Nyquist freq', linestyle='--')
 
         # Set plot title and labels
-        ax.set_title('MTF Components')
-        ax.set_xlabel('Normalized Frequency (f/(1/w))')
-        ax.set_ylabel('MTF Value')
+        ax[0].set_title('MTF Components Act')
+        ax[0].set_xlabel('Spatial frequencies (f/(1/w)) [-]')
+        ax[0].set_ylabel('MTF Value')
 
         # Add a legend
-        ax.legend()
-        ax.set_ylim(0)
-        ax.grid()
+        ax[0].legend()
+        ax[0].set_ylim(0)
+        ax[0].grid()
+
+        # Plot each MTF component
+        ax[1].plot(fnAlt[halfAlt:], Hdiff[halfAlt:, halfAct], color='b', label='Diffraction MTF (Hdiff)')
+        ax[1].plot(fnAlt[halfAlt:], Hdefoc[halfAlt:, halfAct], 'c', label='Defocusing MTF (Hdefoc)')
+        ax[1].plot(fnAlt[halfAlt:], Hwfe[halfAlt:, halfAct], 'g', label='Wavefront Electronics MTF (Hwfe)')
+        ax[1].plot(fnAlt[halfAlt:], Hdet[halfAlt:, halfAct], 'r', label='Detector MTF (Hdet)')
+        ax[1].plot(fnAlt[halfAlt:], Hsmear[halfAlt:, halfAct], 'm', label='Smearing MTF (Hsmear)')
+        ax[1].plot(fnAlt[halfAlt:], Hmotion[halfAlt:, halfAct], 'y', label='Motion Blur MTF (Hsmear)')
+        ax[1].plot(fnAlt[halfAlt:], Hsys[halfAlt:, halfAct], 'k', label='System MTF (Hsys)', linewidth=2)
+        ax[1].axvline(fnAlt[fnAlt.shape[0]-1],  color='k', label='Nyquist crit', linestyle='--')
+
+        # Set plot title and labels
+        ax[1].set_title('MTF Components ALT')
+        ax[1].set_xlabel('Spatial frequencies (f/(1/w)) [-]')
+        ax[1].set_ylabel('MTF Value')
+
+        # Add a legend
+        ax[1].legend()
+        ax[1].set_ylim(0)
+        ax[1].grid()
 
         # Save the plot to the specified directory with the given band name
         #plt.savefig(f'{directory}/{band}_MTF.png')
 
         # Show the plot (optional)
         plt.show()
+
+        with open(f'EODP_TER/EODP-TS-ISM/output/nyquist_{band}.txt', 'a+') as file:
+            file.write('nyquist Act' + '=' + str(Hsys[0, halfAct]) + '\n')
+            file.write('nyquist Alt' + '=' + str(Hsys[halfAlt, 0]) + '\n')
 
 
 

@@ -25,3 +25,11 @@ for band in globalConfig.bands:
     except AssertionError as e:
         print(f'TEST failed for band: {band}. Points exceeding 0.01 deviation: {(error > 0.01).sum()} of {toa_ref.size-toa_ref.size*0.997} allowed')
 
+# PASS/FAIL Criteria 4 Saturated Pixel
+for band in globalConfig.bands:
+    toa = readToa(outdir, globalConfig.ism_toa + band + '.nc')
+    bit_depth = 12
+    saturated_pixels = toa[toa >= 2 ** bit_depth - 1].sum()
+    percen_saturated_pixels = saturated_pixels/toa.sum()*100
+    print(f'TEST Saturated pixels for {band}: {saturated_pixels} - {percen_saturated_pixels}%')
+

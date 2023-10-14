@@ -3,19 +3,17 @@ import logging
 from common.io.writeToa import readToa
 import numpy as np
 from config.globalConfig import globalConfig
-#from l1b.mainL1b import auxdir, indir, outdir
 import os
 import matplotlib.pyplot as plt
 
 
 # Inits
 globalConfig = globalConfig()
-ROOT_DIR = '../../'
-auxdir = os.path.join(ROOT_DIR, 'auxiliary')
-indir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/input")
-outdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/output")
-outeqoffdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/output_eqoff")
-outrefdir = os.path.join(ROOT_DIR, "EODP_TER/EODP-TS-L1B/output_ref")
+auxdir = 'auxiliary'
+indir = "EODP_TER/EODP-TS-L1B/input"
+outdir = "EODP_TER/EODP-TS-L1B/output"
+outeqoffdir = "EODP_TER/EODP-TS-L1B/output_eqoff"
+outrefdir = "EODP_TER/EODP-TS-L1B/output_ref"
 
 # PASS/FAIL Criteria 1
 for band in globalConfig.bands:

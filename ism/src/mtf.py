@@ -216,12 +216,12 @@ class mtf:
         halfAct = int(np.floor(fnAct.shape[0] / 2))
         halfAlt = int(np.floor(fnAlt.shape[0] / 2))
         # Plot each MTF component
-        ax.plot(fnAct[halfAct:], Hdiff[halfAlt, halfAct:], color='b', label='Diffraction MTF (Hdiff)', linestyle='--', )
-        ax.plot(fnAct[halfAct:], Hdefoc[halfAlt, halfAct:], 'c', label='Defocusing MTF (Hdefoc)', linestyle='--')
-        ax.plot(fnAct[halfAct:], Hwfe[halfAlt, halfAct:], 'g', label='Wavefront Electronics MTF (Hwfe)', linestyle='--')
-        ax.plot(fnAct[halfAct:], Hdet[halfAlt, halfAct:], 'r', label='Detector MTF (Hdet)', linestyle='--')
-        ax.plot(fnAct[halfAct:], Hsmear[halfAlt, halfAct:], 'm', label='Smearing MTF (Hsmear)', linestyle='--')
-        ax.plot(fnAct[halfAct:], Hmotion[halfAlt, halfAct:], 'y', label='Motion Blur MTF (Hsmear)', linestyle='--')
+        ax.plot(fnAct[halfAct:], Hdiff[halfAlt, halfAct:], color='b', label='Diffraction MTF (Hdiff)')
+        ax.plot(fnAct[halfAct:], Hdefoc[halfAlt, halfAct:], 'c', label='Defocusing MTF (Hdefoc)')
+        ax.plot(fnAct[halfAct:], Hwfe[halfAlt, halfAct:], 'g', label='Wavefront Electronics MTF (Hwfe)')
+        ax.plot(fnAct[halfAct:], Hdet[halfAlt, halfAct:], 'r', label='Detector MTF (Hdet)')
+        ax.plot(fnAct[halfAct:], Hsmear[halfAlt, halfAct:], 'm', label='Smearing MTF (Hsmear)')
+        ax.plot(fnAct[halfAct:], Hmotion[halfAlt, halfAct:], 'y', label='Motion Blur MTF (Hsmear)')
         ax.plot(fnAct[halfAct:], Hsys[halfAlt, halfAct:], 'k', label='System MTF (Hsys)', linewidth=2)
 
         # Set plot title and labels

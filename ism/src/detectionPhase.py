@@ -108,6 +108,7 @@ class detectionPhase(initIsm):
         E_photon = (self.constants.h_planck*self.constants.speed_light)/wv
         N_photon = E_in/E_photon
         toa_ph = N_photon
+        self.logger.info(f"TEST Criteria: Irradiance to photons conversion factor = {area_pix * tint/E_photon}")
         return toa_ph
 
     def phot2Electr(self, toa, QE):
@@ -119,6 +120,7 @@ class detectionPhase(initIsm):
         """
         N_e = toa*QE
         toa_e = N_e
+        self.logger.info(f"TEST Criteria: Photons to electrons conversion factor = {QE}")
         return toa_e
 
     def badDeadPixels(self, toa,bad_pix,dead_pix,bad_pix_red,dead_pix_red):

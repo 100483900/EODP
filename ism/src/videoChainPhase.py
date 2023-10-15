@@ -56,6 +56,7 @@ class videoChainPhase(initIsm):
         :return: output toa in [V]
         """
         toa=toa*OCF*gain_adc
+        self.logger.info(f"TEST Criteria: Electrons to Volts conversion factor = {OCF*gain_adc}")
         return toa
 
     def digitisation(self, toa, bit_depth, min_voltage, max_voltage):
@@ -70,5 +71,6 @@ class videoChainPhase(initIsm):
         toa_dn = np.round((toa/(max_voltage-min_voltage))*(2**bit_depth-1))
         toa_dn[toa_dn > 2**bit_depth-1] = 2**bit_depth-1
         toa_dn[toa_dn < 0] = 0
+        self.logger.info(f"TEST Criteria: Volts to Digital conversion factor = {(1/(max_voltage-min_voltage))*(2**bit_depth-1)}")
         return toa_dn
 

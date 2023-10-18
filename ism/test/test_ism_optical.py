@@ -21,7 +21,7 @@ for band in globalConfig.bands:
         toa_ref = readToa(outrefdir, globalConfig.ism_toa_isrf + band + '.nc')
         error = np.divide(np.abs(toa-toa_ref), toa, out=np.zeros_like(toa), where=toa != 0)*100 # Div handling div/0
         assert (error < 0.01).sum() > toa_ref.size*0.997
-        print(f'PASSED for {band}')
+        print(f'PASSED for {band}. Points exceeding 0.01 deviation: {(error > 0.01).sum()} ')
     except AssertionError as e:
         print(f'TEST failed for band: {band}. Points exceeding 0.01 deviation: {(error > 0.01).sum()} of {toa_ref.size-toa_ref.size*0.997} allowed')
 
@@ -32,7 +32,7 @@ for band in globalConfig.bands:
         toa_ref = readToa(outrefdir, globalConfig.ism_toa_optical + band + '.nc')
         error = np.divide(np.abs(toa-toa_ref), toa, out=np.zeros_like(toa), where=toa != 0)*100 # Div handling div/0
         assert (error < 0.01).sum() > toa_ref.size * 0.997
-        print(f'PASSED for {band}')
+        print(f'PASSED for {band}. Points exceeding 0.01 deviation: {(error > 0.01).sum()} ')
     except AssertionError as e:
         print(
             f'TEST failed for band: {band}. Points exceeding 0.01 deviation: {(error > 0.01).sum()} of {toa_ref.size - toa_ref.size * 0.997} allowed')

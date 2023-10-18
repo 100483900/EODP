@@ -229,7 +229,7 @@ class mtf:
         ax[0].axvline(fnAct[fnAct.shape[0]-1], color='k', label='Nyquist freq', linestyle='--')
 
         # Set plot title and labels
-        ax[0].set_title('MTF Components Act')
+        ax[0].set_title(f'MTF Components ACT for band: {band}')
         ax[0].set_xlabel('Spatial frequencies (f/(1/w)) [-]')
         ax[0].set_ylabel('MTF Value')
 
@@ -249,7 +249,7 @@ class mtf:
         ax[1].axvline(fnAlt[fnAlt.shape[0]-1],  color='k', label='Nyquist crit', linestyle='--')
 
         # Set plot title and labels
-        ax[1].set_title('MTF Components ALT')
+        ax[1].set_title(f'MTF Components ALT for band: {band}')
         ax[1].set_xlabel('Spatial frequencies (f/(1/w)) [-]')
         ax[1].set_ylabel('MTF Value')
 

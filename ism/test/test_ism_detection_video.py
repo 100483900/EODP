@@ -31,5 +31,5 @@ for band in globalConfig.bands:
     bit_depth = 12
     saturated_pixels = toa[toa >= 2 ** bit_depth - 1].sum()
     percen_saturated_pixels = saturated_pixels/toa.sum()*100
-    print(f'TEST Saturated pixels for {band}: {saturated_pixels} - {percen_saturated_pixels}%')
+    print(f'TEST Saturated pixels for {band}: {saturated_pixels} - {round(percen_saturated_pixels,2)}%')
 

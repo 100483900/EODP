@@ -9,7 +9,9 @@ import os
 auxdir = 'auxiliary'
 indir = "EODP_TER/EODP-TS-L1B/input"
 outdir = "EODP_TER/EODP-TS-L1B/output"
+input_e2e = "EODP_TER/EODP-TS-E2E/outputISM"
+output_e2e = "EODP_TER/EODP-TS-E2E/outputL1b"
 
 # Initialise the ISM
-myL1b = l1b(auxdir, indir, outdir)
+myL1b = l1b(auxdir, input_e2e, output_e2e)
 myL1b.processModule()

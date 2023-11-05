@@ -104,7 +104,11 @@ class detectionPhase(initIsm):
         :param wv: Central wavelength of the band [m]
         :return: Toa in photons
         """
-        #TODO
+        E_in = toa/1000 * area_pix * tint # Convert to W
+        E_photon = (self.constants.h_planck*self.constants.speed_light)/wv
+        N_photon = E_in/E_photon
+        toa_ph = N_photon
+        self.logger.info(f"TEST Criteria: Irradiance to photons conversion factor = {area_pix * tint/E_photon}")
         return toa_ph
 
     def phot2Electr(self, toa, QE):
@@ -114,8 +118,10 @@ class detectionPhase(initIsm):
         :param QE: Quantum efficiency [e-/ph]
         :return: toa in electrons
         """
-        #TODO
-        return toae
+        N_e = toa*QE
+        toa_e = N_e
+        self.logger.info(f"TEST Criteria: Photons to electrons conversion factor = {QE}")
+        return toa_e
 
     def badDeadPixels(self, toa,bad_pix,dead_pix,bad_pix_red,dead_pix_red):
         """
@@ -127,7 +133,7 @@ class detectionPhase(initIsm):
         :param dead_pix_red: Reduction in the quantum efficiency for the dead pixels [-, over 1]
         :return: toa in e- including bad & dead pixels
         """
-        #TODO
+        toa[:, 5] = toa[:, 5]*(1-bad_pix_red)
         return toa
 
     def prnu(self, toa, kprnu):
@@ -137,7 +143,12 @@ class detectionPhase(initIsm):
         :param kprnu: multiplicative factor to the standard normal deviation for the PRNU
         :return: TOA after adding PRNU [e-]
         """
-        #TODO
+        prnu = np.random.normal(0.0, 1.0, toa.shape[1])*kprnu
+
+        # Update toa from prnu
+        for iact in range(toa.shape[1]):
+            toa[:, iact] = toa[:, iact]*(1+prnu[iact])
+
         return toa
 
 
@@ -152,5 +163,15 @@ class detectionPhase(initIsm):
         :param ds_B_coeff: Empirical parameter of the model 6040 K
         :return: TOA in [e-] with dark signal
         """
-        #TODO
+        dsnu = np.random.normal(0.0, 1.0, toa.shape[1])*kdsnu
+        Sd = ds_A_coeff*(T/Tref)**3*np.exp(-ds_B_coeff*(1/T - 1/Tref))
+        DS = Sd * (1 + np.abs(dsnu))
+        for iact in range(toa.shape[1]):
+            toa[:, iact] = toa[:, iact] + DS[iact]
+
+        # Sd = ds_A_coeff * (T / Tref) ** 3 * np.exp(-ds_B_coeff * (1 / T - 1 / Tref))
+        # Ds = Sd * (1 + np.abs(np.random.normal(0, 1, toa.shape[1]) * kdsnu))
+        #
+        # for act in range(toa.shape[1]):
+        #     toa[:, act] = toa[:, act] + Ds[act]
         return toa

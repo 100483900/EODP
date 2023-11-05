@@ -69,7 +69,7 @@ class mtf:
 
         # Calculate the System MTF
         self.logger.debug("Calculation of the Sysmtem MTF by multiplying the different contributors")
-        Hsys = 1 # dummy
+        Hsys = Hdiff*Hdefoc*Hwfe*Hdet*Hsmear*Hmotion
 
         # Plot cuts ACT/ALT of the MTF
         self.plotMtf(Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band)
@@ -91,7 +91,29 @@ class mtf:
         :return fnAct: 1D normalised frequencies 2D ACT (f/(1/w))
         :return fnAlt: 1D normalised frequencies 2D ALT (f/(1/w))
         """
-        #TODO
+        # Sampling of the frequencies
+        fstepAlt = 1/nlines/w
+        fstepAct = 1/ncolumns/w
+
+        # Frequencies vector
+        eps = 1e-6 # epsilon
+        # centered halves of detector width - eps
+        fAlt = np.arange(-1 / (2 * w), 1 / (2 * w) - eps, fstepAlt)
+        fAct = np.arange(-1 / (2 * w), 1 / (2 * w) - eps, fstepAct)
+
+        fnAlt = fAlt/(1/w)
+        fnAct = fAct/(1/w)
+
+        #nyquist_f = 1/(2/w)
+        #self.logger.info(f"Nyquist Frequency = {nyquist_f}")
+
+        [fnAltxx, fnActxx] = np.meshgrid(fnAlt, fnAct, indexing='ij')
+        fn2D = np.sqrt(fnAltxx * fnAltxx + fnActxx * fnActxx)
+
+        f_co = D /(lambd*focal)
+
+        fr2D = fn2D * (1/w) / f_co
+
         return fn2D, fr2D, fnAct, fnAlt
 
     def mtfDiffract(self,fr2D):
@@ -100,7 +122,11 @@ class mtf:
         :param fr2D: 2D relative frequencies (f/fc), where fc is the optics cut-off frequency
         :return: diffraction MTF
         """
-        #TODO
+        Hdiff  = np.zeros((fr2D.shape[0],fr2D.shape[1]))
+        for i in range(fr2D.shape[0]):
+            for j in range(fr2D.shape[1]):
+                Hdiff[i, j] = 2 / pi * (np.arccos(fr2D[i, j]) - fr2D[i, j] * np.sqrt((1 - np.square(fr2D[i, j]))))
+
         return Hdiff
 
 
@@ -113,7 +139,10 @@ class mtf:
         :param D: Telescope diameter [m]
         :return: Defocus MTF
         """
-        #TODO
+
+        x = pi * defocus * fr2D * (1 - fr2D)
+        Hdefoc = 2 * j1(x) / x
+
         return Hdefoc
 
     def mtfWfeAberrations(self, fr2D, lambd, kLF, wLF, kHF, wHF):
@@ -127,7 +156,7 @@ class mtf:
         :param wHF: RMS of high-frequency wavefront errors [m]
         :return: WFE Aberrations MTF
         """
-        #TODO
+        Hwfe = np.exp(-fr2D*(1-fr2D)*(kLF*(wLF*wLF/lambd/lambd)+kHF*(wHF*wHF/lambd/lambd)))
         return Hwfe
 
     def mtfDetector(self,fn2D):
@@ -136,7 +165,9 @@ class mtf:
         :param fnD: 2D normalised frequencies (f/(1/w))), where w is the pixel width
         :return: detector MTF
         """
-        #TODO
+        #Hdet = np.abs(np.sin(pi*fn2D)/(pi*fn2D))
+        Hdet = np.abs(np.sinc(fn2D))
+
         return Hdet
 
     def mtfSmearing(self, fnAlt, ncolumns, ksmear):
@@ -147,7 +178,11 @@ class mtf:
         :param ksmear: Amplitude of low-frequency component for the motion smear MTF in ALT [pixels]
         :return: Smearing MTF
         """
-        #TODO
+        Hsmear = np.zeros((fnAlt.shape[0], ncolumns))
+        row_smear = np.sinc(fnAlt * ksmear)
+        for i in range(ncolumns):
+            Hsmear[:, i] = row_smear
+
         return Hsmear
 
     def mtfMotion(self, fn2D, kmotion):
@@ -157,7 +192,7 @@ class mtf:
         :param kmotion: Amplitude of high-frequency component for the motion smear MTF in ALT and ACT
         :return: detector MTF
         """
-        #TODO
+        Hmotion = np.sinc(fn2D * kmotion)
         return Hmotion
 
     def plotMtf(self,Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band):
@@ -178,6 +213,60 @@ class mtf:
         :param band: band
         :return: N/A
         """
-        #TODO
+
+        fig, ax = plt.subplots(2, figsize=(10, 18))
+
+        halfAct = int(fnAct.shape[0] / 2)
+        halfAlt = int(fnAlt.shape[0] / 2)
+        # Plot each MTF component
+        ax[0].plot(fnAct[halfAct:], Hdiff[halfAlt, halfAct:], color='b', label='Diffraction MTF (Hdiff)')
+        ax[0].plot(fnAct[halfAct:], Hdefoc[halfAlt, halfAct:], 'c', label='Defocusing MTF (Hdefoc)')
+        ax[0].plot(fnAct[halfAct:], Hwfe[halfAlt, halfAct:], 'g', label='Wavefront Electronics MTF (Hwfe)')
+        ax[0].plot(fnAct[halfAct:], Hdet[halfAlt, halfAct:], 'r', label='Detector MTF (Hdet)')
+        ax[0].plot(fnAct[halfAct:], Hsmear[halfAlt, halfAct:], 'm', label='Smearing MTF (Hsmear)')
+        ax[0].plot(fnAct[halfAct:], Hmotion[halfAlt, halfAct:], 'y', label='Motion Blur MTF (Hsmear)')
+        ax[0].plot(fnAct[halfAct:], Hsys[halfAlt, halfAct:], 'k', label='System MTF (Hsys)', linewidth=2)
+        ax[0].axvline(fnAct[fnAct.shape[0]-1], color='k', label='Nyquist freq', linestyle='--')
+
+        # Set plot title and labels
+        ax[0].set_title(f'MTF Components ACT for band: {band}')
+        ax[0].set_xlabel('Spatial frequencies (f/(1/w)) [-]')
+        ax[0].set_ylabel('MTF Value')
+
+        # Add a legend
+        ax[0].legend()
+        ax[0].set_ylim(0)
+        ax[0].grid()
+
+        # Plot each MTF component
+        ax[1].plot(fnAlt[halfAlt:], Hdiff[halfAlt:, halfAct], color='b', label='Diffraction MTF (Hdiff)')
+        ax[1].plot(fnAlt[halfAlt:], Hdefoc[halfAlt:, halfAct], 'c', label='Defocusing MTF (Hdefoc)')
+        ax[1].plot(fnAlt[halfAlt:], Hwfe[halfAlt:, halfAct], 'g', label='Wavefront Electronics MTF (Hwfe)')
+        ax[1].plot(fnAlt[halfAlt:], Hdet[halfAlt:, halfAct], 'r', label='Detector MTF (Hdet)')
+        ax[1].plot(fnAlt[halfAlt:], Hsmear[halfAlt:, halfAct], 'm', label='Smearing MTF (Hsmear)')
+        ax[1].plot(fnAlt[halfAlt:], Hmotion[halfAlt:, halfAct], 'y', label='Motion Blur MTF (Hsmear)')
+        ax[1].plot(fnAlt[halfAlt:], Hsys[halfAlt:, halfAct], 'k', label='System MTF (Hsys)', linewidth=2)
+        ax[1].axvline(fnAlt[fnAlt.shape[0]-1],  color='k', label='Nyquist crit', linestyle='--')
+
+        # Set plot title and labels
+        ax[1].set_title(f'MTF Components ALT for band: {band}')
+        ax[1].set_xlabel('Spatial frequencies (f/(1/w)) [-]')
+        ax[1].set_ylabel('MTF Value')
+
+        # Add a legend
+        ax[1].legend()
+        ax[1].set_ylim(0)
+        ax[1].grid()
+
+        # Save the plot to the specified directory with the given band name
+        #plt.savefig(f'{directory}/{band}_MTF.png')
+
+        # Show the plot (optional)
+        plt.show()
+
+        with open(f'EODP_TER/EODP-TS-ISM/output/nyquist_{band}.txt', 'a+') as file:
+            file.write('nyquist Act' + '=' + str(Hsys[0, halfAct]) + '\n')
+            file.write('nyquist Alt' + '=' + str(Hsys[halfAlt, 0]) + '\n')
+
 
 

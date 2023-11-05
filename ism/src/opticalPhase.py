@@ -1,3 +1,4 @@
+import logging
 
 from ism.src.initIsm import initIsm
 from math import pi
@@ -92,7 +93,9 @@ class opticalPhase(initIsm):
         :param Tr: Optical transmittance [-]
         :return: TOA image in irradiances [mW/m2]
         """
-        # TODO
+        rad2irra = Tr * pi * (D / f) * (D / f) / 4
+        toa = toa * rad2irra
+        self.logger.info(f"TEST Criteria: Radiance to irradiance criteria = {rad2irra}")
         return toa
 
 
@@ -103,7 +106,11 @@ class opticalPhase(initIsm):
         :param Hsys: System MTF
         :return: TOA image in irradiances [mW/m2]
         """
-        # TODO
+        GE = fft2(toa)
+        toa_ft = ifft2(GE * fftshift(Hsys))
+        toa_imag = np.imag(toa_ft) # Debug check to see if imaginary part is 0
+        # Imaginary part is not 0, get only real part
+        toa_ft = np.real(toa_ft)
         return toa_ft
 
     def spectralIntegration(self, sgm_toa, sgm_wv, band):
@@ -114,7 +121,15 @@ class opticalPhase(initIsm):
         :param band: band
         :return: TOA image 2D in radiances [mW/m2]
         """
-        # TODO
+        # Initialize TOA
+        toa = np.zeros((sgm_toa.shape[0], sgm_toa.shape[1]))
+        isrf, isrf_w = readIsrf(self.auxdir + self.ismConfig.isrffile, band)
+        isrf_norm = isrf / np.sum(isrf) # ISRF normalized
+        isrf_w = isrf_w*1000 # micron meters to nm
+        for ialt, alt in enumerate(sgm_toa):
+            for iact, act in enumerate(alt):
+                cs = interp1d(sgm_wv, sgm_toa[ialt, iact, :], fill_value=(0, 0), bounds_error=False)
+                toa_interp = cs(isrf_w) # New value interpolated
+                toa[ialt, iact] = np.sum(toa_interp * isrf_norm) # Irradiance
+
         return toa
-
-

@@ -1,3 +1,6 @@
+# My gitignore
+EODP_TER/
+
 # Compilation files
 \.gradle
 gradle*\.*
@@ -12,7 +15,7 @@ lib/
 # Tools outputs
 *.nc
 *.png
-*.txt
+#*.txt
 *.log
 
 # Test outputs
